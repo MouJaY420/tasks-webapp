@@ -1,0 +1,54 @@
+{# main/templates/main/household_dashboard.html #}
+{% extends "main/base.html" %}
+{% block title %}{{ household.name }} Dashboard{% endblock %}
+
+{% block content %}
+  <h2>{{ household.name }} Dashboard</h2>
+  <div class="row gy-4">
+
+    <div class="col-6 col-md-4">
+      <a href="{% url 'main:household_settings' household.pk %}" class="card h-100 text-decoration-none text-dark">
+        <div class="card-body text-center">
+          <i class="bi bi-gear-fill" style="font-size:2rem;"></i>
+          <h5 class="card-title mt-2">Household Settings</h5>
+          <p class="card-text">Change name, default currency, and more.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4">
+      <a href="{% url 'expenses:household_expenses' household.pk %}" class="card h-100 text-decoration-none text-dark">
+        <div class="card-body text-center">
+          <i class="bi bi-cash-stack" style="font-size:2rem;"></i>
+          <h5 class="card-title mt-2">Expenses</h5>
+          <p class="card-text">Track private & shared expenses.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-6 col-md-4">
+      <a href="{% url 'main:household_detail' household.pk %}" class="card h-100 text-decoration-none text-dark">
+        <div class="card-body text-center">
+          <i class="bi bi-list-check" style="font-size:2rem;"></i>
+          <h5 class="card-title mt-2">Tasks</h5>
+          <p class="card-text">View and manage household tasks.</p>
+        </div>
+      </a>
+    </div>
+
+    
+
+    <div class="col-6 col-md-4">
+        <a href="{}" class="card h-100 text-decoration-none text-dark">
+        <div class="card-body text-center">
+          <i class="bi bi-egg-fried" style="font-size:2rem;"></i>
+          <h5 class="card-title mt-2">Meal Planner</h5>
+          <p class="card-text">Plan meals & generate grocery lists.</p>
+        </div>
+      </a>
+    </div>
+
+    {# Add more cards for calendar, chat, gamification, etc. #}
+
+  </div>
+{% endblock %}

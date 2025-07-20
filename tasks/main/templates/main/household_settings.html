@@ -1,0 +1,47 @@
+{% extends "main/base.html" %}
+
+{% block title %}{{ household.name }} Settings{% endblock %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2 class="mb-3">{{ household.name }} Settings</h2>
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+
+      <div class="col-md-6">
+        {{ form.name.label_tag }}
+        {{ form.name }}
+        {{ form.name.errors }}
+      </div>
+
+      <div class="col-md-6">
+        {{ form.default_currency.label_tag }}
+        {{ form.default_currency }}
+        {{ form.default_currency.errors }}
+      </div>
+
+      <div class="col-md-6">
+        {{ form.default_language.label_tag }}
+        {{ form.default_language }}
+        {{ form.default_language.errors }}
+      </div>
+
+      <div class="col-md-3 form-check">
+        {{ form.household_shop }}
+        {{ form.household_shop.label_tag }}
+        {{ form.household_shop.errors }}
+      </div>
+
+      <div class="col-md-3 form-check">
+        {{ form.gamification_enabled }}
+        {{ form.gamification_enabled.label_tag }}
+        {{ form.gamification_enabled.errors }}
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-primary" type="submit">Save Settings</button>
+        <a href="{% url 'main:household_dashboard' household.pk %}" class="btn btn-secondary ms-2">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

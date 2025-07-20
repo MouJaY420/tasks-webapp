@@ -1,8 +1,16 @@
 asgiref==3.9.1
 certifi==2025.7.14
+channels==4.2.2
 charset-normalizer==3.4.2
+colorama==0.4.6
 Django==5.2.4
 idna==3.10
+packaging==25.0
+pillow==11.3.0
+psycopg==3.2.9
+psycopg-binary==3.2.9
+pytesseract==0.3.13
+qrcode==8.2
 requests==2.32.4
 sqlparse==0.5.3
 tzdata==2025.2

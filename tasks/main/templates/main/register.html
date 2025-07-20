@@ -1,0 +1,21 @@
+{# templates/main/register.html #}
+{% extends "main/base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+  <h2>Register</h2>
+  <form method="post" class="row g-3">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="col-12">
+        {{ field.label_tag }}
+        {{ field }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <div class="col-12">
+      <button class="btn btn-primary" type="submit">Sign up</button>
+    </div>
+  </form>
+{% endblock %}

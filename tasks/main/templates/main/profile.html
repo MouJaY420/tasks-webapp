@@ -1,0 +1,42 @@
+{% extends "main/base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+    <h2>My Profile</h2>
+    <p><strong>Username:</strong> {{ user_obj.username }}</p>
+    <p><strong>Display name:</strong> {{ user_obj.display_name }}</p>
+    <p><strong>Email:</strong> {{ user_obj.email }}</p>
+    <p><a href="{% url 'main:profile_edit' %}" class="btn btn-secondary">Edit Profile</a></p>
+    <h3>Log a Private Expense</h3>
+    <form method="post" class="row g-2 mb-4">
+        {% csrf_token %}
+        <div class="col-md-4">
+            {{ expense_form.amount.label_tag }}
+            {{ expense_form.amount }}
+            {{ expense_form.amount.errors }}
+        </div>
+        <div class="col-md-4">
+            {{ expense_form.description.label_tag }}
+            {{ expense_form.description }}
+            {{ expense_form.description.errors }}
+        </div>
+        {# Force private: hide share checkbox #}
+        <input type="hidden" name="share_with_household" value="">
+        <input type="hidden" name="household" value="">
+        <div class="col-md-2">
+            <button class="btn btn-success w-100" type="submit">Log</button>
+        </div>
+    </form>
+
+    <h3 class="mt-4">My Private Expenses</h3>
+    <ul class="list-group">
+        {% for exp in private_expenses %}
+        <li class="list-group-item d-flex justify-content-between">
+        <div>{{ exp.date }} — {{ exp.description }}</div>
+            <span>{{ exp.amount }} {{ exp.currency }}</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No private expenses logged.</li>
+            {% endfor %}
+    </ul>
+{% endblock %}

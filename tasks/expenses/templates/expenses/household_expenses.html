@@ -1,0 +1,164 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+
+{% block title %}{{ household.name }} Expenses{% endblock %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2 class="mb-3">{{ household.name }} – Shared Expenses</h2>
+
+    {# Toggle button #}
+<button
+  id="toggleChartBtn" 
+  class="btn btn-outline-secondary mb-3"
+  type="button"
+  data-bs-toggle="collapse"
+  data-bs-target="#expenseChartContainer"
+  aria-expanded="false"
+  aria-controls="expenseChartContainer"
+>
+  Show Monthly Chart
+</button>
+
+{# Collapsible chart container #}
+<div class="collapse" id="expenseChartContainer">
+  <div class="card card-body mb-4">
+    <h5 class="card-title">Monthly Shared Expenses</h5>
+    <canvas id="monthlyChart" height="100"></canvas>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Add a Shared Expense</h5>
+
+    <form method="post" enctype="multipart/form-data" class="row g-2">
+      {% csrf_token %}
+
+      <div class="col-md-2">
+        {{ form.amount.label_tag }}
+        {{ form.amount }}
+        {{ form.amount.errors }}
+      </div>
+
+      <div class="col-md-2">
+        {{ form.currency.label_tag }}
+        {{ form.currency }}
+        {{ form.currency.errors }}
+      </div>
+
+      <div class="col-md-2">
+        {{ form.date.label_tag }}
+        {{ form.date }}
+        {{ form.date.errors }}
+      </div>
+
+      <div class="col-md-4">
+        {{ form.description.label_tag }}
+        {{ form.description }}
+        {{ form.description.errors }}
+      </div>
+
+      <input type="hidden" name="household" value="{{ household.pk }}">
+      <input type="hidden" name="share_with_household" value="on">
+
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-success w-100">Add</button>
+      </div>
+
+      <div class="col-12 text-danger">
+        {{ form.non_field_errors }}
+      </div>
+    </form>
+      <!-- Receipt Scan Section -->
+    
+<form method="post" action="{% url 'expenses:upload_receipt' %}" enctype="multipart/form-data">
+  {% csrf_token %}
+  <button
+    class="btn btn-outline-secondary btn-sm mt-2"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#receiptScanSection"
+    aria-expanded="false"
+    aria-controls="receiptScanSection"
+  >
+    Scan or Upload Receipt
+  </button>
+
+  <div class="collapse mt-3" id="receiptScanSection">
+    <label class="form-label fw-bold">Scan or Upload Receipt</label>
+
+    <div id="mobile-upload" class="d-none">
+      <input type="file" name="receipt_image" accept="image/*" capture="environment" class="form-control mb-2">
+    </div>
+
+    <div id="desktop-qr" class="d-none">
+      <p class="small text-muted">Scan this QR code with your phone:</p>
+      <img src="{% url 'expenses:qr_code' %}" alt="QR code to upload receipt" width="160">
+    </div>
+
+    <form method="post" action="{% url 'expenses:upload_receipt' %}" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="file" name="receipt_image" accept="image/*" class="form-control mb-2">
+  <button type="submit" class="btn btn-primary">Upload Receipt</button>
+</form>
+  </div>
+</form>
+  </div>
+</div>
+
+    <h5 class="mb-3">Shared Expenses</h5>
+    <ul class="list-group">
+  {% for exp in shared_expenses %}
+    <li class="list-group-item">
+
+      {% if edit_pk == exp.pk|stringformat:"s" %}
+        {# EDIT FORM #}
+        <form method="post" class="mb-2">
+          {% csrf_token %}
+          <input type="hidden" name="edit_expense" value="{{ exp.pk }}">
+          {{ edit_form.as_p }}
+          <button class="btn btn-sm btn-success">Save</button>
+          <a href="{% url 'expenses:household_expenses' household.pk %}" class="btn btn-sm btn-secondary">Cancel</a>
+        </form>
+
+      {% else %}
+        {# DISPLAY MODE #}
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ exp.user.display_name|default:exp.user.username }}</strong>
+            on {{ exp.date }}:
+            {{ exp.amount }} {{ exp.currency }}
+            → {{ exp.converted_amount }} {{ household.default_currency }}
+            — {{ exp.description }}
+          </div>
+          <span>
+            <a href="?edit={{ exp.pk }}" class="btn btn-sm btn-outline-secondary me-2">Edit</a>
+            <form method="post" class="d-inline">
+              {% csrf_token %}
+              <input type="hidden" name="delete_expense" value="{{ exp.pk }}">
+              <button class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </span>
+        </div>
+      {% endif %}
+
+    </li>
+  {% empty %}
+    <li class="list-group-item text-muted">No shared expenses yet.</li>
+  {% endfor %}
+</ul>
+
+
+  </div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+  const chart_labels = {{ chart_labels_json|safe }};
+  const chart_data = {{ chart_data_json|safe }};
+  const chart_label = 'Shared Expenses ({{ household.default_currency }})';
+</script>
+<script src="{% static 'expenses/js/expenses.js' %}"></script>
+{% endblock %}

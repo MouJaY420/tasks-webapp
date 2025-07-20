@@ -1,0 +1,13 @@
+{% extends "main/base.html" %}
+{% block title %}Receipt Text Preview{% endblock %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2>Extracted Text from Receipt</h2>
+    <pre style="white-space: pre-wrap;">{{ extracted_text }}</pre>
+
+    <a href="{% url 'expenses:household_expenses' household.pk %}" class="btn btn-secondary mt-3">
+      ← Back to Expenses
+    </a>
+  </div>
+{% endblock %}

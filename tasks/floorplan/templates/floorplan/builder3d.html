@@ -1,0 +1,15 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}{{ request.user.household.name }} 3D Builder{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  <canvas id="canvas-container"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <!-- Your custom JS -->
+  <script type="module" src="{% static 'floorplan/js/builder3d.js' %}"></script>
+{% endblock %}

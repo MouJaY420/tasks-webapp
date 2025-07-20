@@ -1,0 +1,14 @@
+{% extends "main/base.html" %}
+{% block title %}Upload Receipt{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2 class="mb-3">Scan or Upload Your Receipt</h2>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="receipt_image" accept="image/*" capture="environment" class="form-control mb-3" required>
+            <button type="submit" class="btn btn-primary">Upload & Scan</button>
+        </form>
+    </div>
+{% endblock %}
