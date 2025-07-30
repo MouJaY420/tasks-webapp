@@ -1,0 +1,58 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+
+{% block title %}{{ household.name }} Menu Plan{% endblock %}
+
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    {{ plan_form.name.label_tag }} {{ plan_form.name }}
+  </div>
+  <div class="row mb-3">
+    <div class="col">
+      {{ plan_form.start_date.label_tag }} {{ plan_form.start_date }}
+    </div>
+    <div class="col">
+      {{ plan_form.end_date.label_tag }} {{ plan_form.end_date }}
+    </div>
+  </div>
+
+  {{ formset.management_form }}
+
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle text-center">
+      <thead class="table-light">
+        <tr>
+          <th>Date</th>
+          <th>Meal Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for form in formset %}
+          <tr>
+            <td>{{ form.date }}</td>
+            <td>{{ form.meal_type }}</td>
+            <td>
+              <!-- Hidden input -->
+              {{ form.description.as_widget(attrs={'class': 'd-none'}) }}
+
+              <!-- Visible editable field -->
+              <div contenteditable="true"
+                   class="form-control editable"
+                   data-input-id="{{ form.description.auto_id }}">
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Save Weekly Plan</button>
+</form>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'menu/js/menu.js' %}"></script>
+{% endblock %}}

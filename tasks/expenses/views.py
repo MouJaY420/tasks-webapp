@@ -16,6 +16,7 @@ import pytesseract
 from PIL import Image
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from .utils import preprocess_image_for_ocr
 
 
 @login_required
@@ -86,7 +87,8 @@ def household_expenses(request, pk):
 def qr_code_view(request):
     ip = get_local_ip()         # Gets LAN IP like 192.168.1.114
     port = request.get_port()   # Typically 8000
-    upload_url = reverse('expenses:upload_receipt')
+    household_id = request.user.household_id
+    upload_url = reverse('expenses:upload_receipt', args=[household_id])
     full_url = f"http://{ip}:{port}{upload_url}"
 
     # Generate the QR code
@@ -96,26 +98,28 @@ def qr_code_view(request):
     buffer.seek(0)
     return HttpResponse(buffer.read(), content_type="image/png")
 
-def upload_receipt(request):
+def upload_receipt(request, pk):
+    household = get_object_or_404(Household, pk=pk)
+
     if request.method == 'POST' and request.FILES.get('receipt_image'):
         image_file = request.FILES['receipt_image']
         img = Image.open(image_file)
-        text = pytesseract.image_to_string(img)
-        
+        clean_img = preprocess_image_for_ocr(img)
+        text = pytesseract.image_to_string(clean_img)
+
+        # WebSocket real-time update
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            f"receipt_{request.user.household.pk}",
+            f"receipt_updates_{pk}",
             {
-            "type": "receipt_uploaded",
-            "text": json.dumps({"status": "uploaded"})
+                'type': 'send_receipt_update',
+                'message': text,
             }
         )
 
-        household = getattr(request.user, 'household', None)
         return render(request, 'expenses/receipt_ocr_preview.html', {
             'extracted_text': text,
             'household': household,
         })
 
-    # If user visits this via QR or mobile browser
     return render(request, 'expenses/receipt_upload_form.html')

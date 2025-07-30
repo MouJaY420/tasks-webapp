@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'expenses.apps.ExpensesConfig',
     'chores.apps.ChoresConfig',
     'floorplan.apps.FloorplanConfig',
+    'channels',
+    'menu.apps.MenuConfig',
 ]
 
 # Custom user model
@@ -78,7 +80,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tasks.wsgi.application'
 
-ASGI_APPLICATION = 'your_project_name.asgi.application'
+ASGI_APPLICATION = 'tasks.asgi.application'
 
 CHANNEL_LAYERS = {
     "default": {
@@ -132,7 +134,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

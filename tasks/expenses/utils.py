@@ -1,6 +1,9 @@
 import requests
 from django.core.cache import cache
 import socket
+import cv2
+import numpy as np
+from PIL import Image
 
 def get_exchange_rate(from_currency: str, to_currency: str) -> float:
     """
@@ -37,3 +40,22 @@ def get_local_ip():
     finally:
         s.close()
     return IP
+
+def preprocess_image_for_ocr(pil_image):
+    # Convert PIL to OpenCV format
+    img = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+    
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Increase contrast using adaptive thresholding
+    thresh = cv2.adaptiveThreshold(
+        gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY, 11, 2
+    )
+
+    # Remove noise
+    denoised = cv2.fastNlMeansDenoising(thresh, None, 30, 7, 21)
+
+    # Convert back to PIL for Tesseract
+    return Image.fromarray(denoised)

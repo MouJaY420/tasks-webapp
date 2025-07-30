@@ -73,16 +73,15 @@
     </form>
       <!-- Receipt Scan Section -->
     
-<form method="post" action="{% url 'expenses:upload_receipt' %}" enctype="multipart/form-data">
+<form method="post" action="{% url 'expenses:upload_receipt' household.pk %}" enctype="multipart/form-data">
   {% csrf_token %}
-  <button
-    class="btn btn-outline-secondary btn-sm mt-2"
-    type="button"
-    data-bs-toggle="collapse"
-    data-bs-target="#receiptScanSection"
-    aria-expanded="false"
-    aria-controls="receiptScanSection"
-  >
+
+  <button class="btn btn-outline-secondary btn-sm mt-2"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#receiptScanSection"
+          aria-expanded="false"
+          aria-controls="receiptScanSection">
     Scan or Upload Receipt
   </button>
 
@@ -98,14 +97,15 @@
       <img src="{% url 'expenses:qr_code' %}" alt="QR code to upload receipt" width="160">
     </div>
 
-    <form method="post" action="{% url 'expenses:upload_receipt' %}" enctype="multipart/form-data">
-  {% csrf_token %}
-  <input type="file" name="receipt_image" accept="image/*" class="form-control mb-2">
-  <button type="submit" class="btn btn-primary">Upload Receipt</button>
-</form>
+    <div id="desktop-upload" class="d-none">
+      <input type="file" name="receipt_image" accept="image/*" class="form-control mb-2">
+      <button type="submit" class="btn btn-primary">Upload Receipt</button>
+    </div>
   </div>
 </form>
+
   </div>
+  <pre id="receipt-output" class="mt-4 text-muted"></pre>
 </div>
 
     <h5 class="mb-3">Shared Expenses</h5>
@@ -160,5 +160,22 @@
   const chart_data = {{ chart_data_json|safe }};
   const chart_label = 'Shared Expenses ({{ household.default_currency }})';
 </script>
+<script>
+  const householdId = "{{ household.pk }}";
+  const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+  const receiptSocket = new WebSocket(
+      `${wsProtocol}://${window.location.host}/ws/receipt/${householdId}/`
+  );
+
+  receiptSocket.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      const outputEl = document.getElementById("receipt-output");
+      if (outputEl) {
+          outputEl.textContent = data.message;
+          outputEl.classList.remove("text-muted");
+      }
+  };
+</script>
+
 <script src="{% static 'expenses/js/expenses.js' %}"></script>
 {% endblock %}
