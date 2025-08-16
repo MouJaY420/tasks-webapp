@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from main.models import Household
 from datetime import timedelta, date
-from main.models import Household
+from django.forms import inlineformset_factory
 
 @login_required
 def create_menu_plan(request):
@@ -51,6 +51,13 @@ def create_menu_plan(request):
 def menu_dashboard(request):
     user = request.user
     household = Household.objects.filter(members=user).first()
+    if not household.meal_count:
+        if request.method == 'POST':
+            count = int(request.POST.get('meal_count'))
+            household.meal_count = count
+            household.save()
+            return redirect('menu:menu_dashboard')
+        return render(request, 'menu/set_meal_count.html')
 
     if request.method == 'POST':
         plan_form = MenuPlanForm(request.POST)
@@ -70,11 +77,13 @@ def menu_dashboard(request):
         start = date.today()
         end = start + timedelta(days=6)
         plan_form = MenuPlanForm(initial={'start_date': start, 'end_date': end})
+        meal_count = household.meal_count
         initial_entries = []
-        for i in range(7):
+        for i in range((end - start).days + 1):
             d = start + timedelta(days=i)
-            for meal in ['breakfast', 'lunch', 'dinner']:
-                initial_entries.append({'date': d, 'meal_type': meal})
+            for meal_number in range(1, meal_count + 1):
+                initial_entries.append({'date': d, 'meal_type': f'meal_{meal_number}'})
+
         formset = MenuEntryFormSet(queryset=MenuEntry.objects.none(),
                                 initial=initial_entries)
 
@@ -84,3 +93,31 @@ def menu_dashboard(request):
         'formset': formset,
         'existing_plans': existing_plans,
     })
+
+MenuEntryFormSet = inlineformset_factory(
+    MenuPlan,
+    MenuEntry,
+    fields=['date','meal_type','description'],
+    extra=0,
+    can_delete=True
+)
+
+@login_required
+def edit_menu_plan(request, pk):
+    plan = get_object_or_404(MenuPlan, pk=pk, household__members=request.user)
+    formset = MenuEntryFormSet(request.POST or None, instance=plan)
+    if request.method == 'POST' and formset.is_valid():
+        formset.save()
+        messages.success(request, "Plan updated.")
+        return redirect('menu:menu_dashboard')
+    return render(request, 'menu/edit_menu_plan.html', {'plan': plan, 'formset': formset})
+
+@login_required
+def delete_menu_plan(request, pk):
+    plan = get_object_or_404(MenuPlan, pk=pk, household__members=request.user)
+    if request.method == 'POST':
+        plan.delete()
+        messages.success(request, "Plan deleted.")
+        return redirect('menu:menu_dashboard')
+    return render(request, 'menu/confirm_delete.html', {'plan': plan})
+

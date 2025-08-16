@@ -13,15 +13,10 @@ class MenuPlan(models.Model):
         return f"{self.name} ({self.start_date} - {self.end_date})"
 
 class MenuEntry(models.Model):
-    MEAL_TYPES = [
-        ('breakfast', 'Breakfast'),
-        ('lunch', 'Lunch'),
-        ('dinner', 'Dinner'),
-    ]
+    meal_type = models.CharField(max_length=10)
 
     menu_plan = models.ForeignKey(MenuPlan, related_name='entries', on_delete=models.CASCADE)
     date = models.DateField()
-    meal_type = models.CharField(max_length=10, choices=MEAL_TYPES)
     description = models.CharField(max_length=255)
 
     def __str__(self):

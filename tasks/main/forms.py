@@ -38,11 +38,12 @@ class CustomUserChangeForm(UserChangeForm):
 class HouseholdSettingsForm(forms.ModelForm):
     class Meta:
         model = Household
-        fields = ['name', 'default_currency', 'default_language', 'household_shop', 'gamification_enabled']
+        fields = ['name', 'default_currency', 'default_language', 'household_shop', 'gamification_enabled', 'meal_count']
         widgets = {
             'name': forms.TextInput(attrs={'class':'form-control'}),
             'default_currency': forms.Select(attrs={'class':'form-select'}),
             'default_language': forms.Select(attrs={'class':'form-select'}),
+            'meal_count': forms.NumberInput(attrs={'class':'form-control', 'min':1, 'max':10}),
             'household_shop': forms.CheckboxInput(attrs={'class':'form-check-input'}),
             'gamification_enabled': forms.CheckboxInput(attrs={'class':'form-check-input'}),
 

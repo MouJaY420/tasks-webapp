@@ -37,6 +37,8 @@ class Household(models.Model):
     household_shop = models.BooleanField(default=False)
     gamification_enabled = models.BooleanField(default=True)
 
+    meal_count = models.PositiveIntegerField(help_text="Number of meals per day")
+
     def __str__(self):
         return self.name
 
