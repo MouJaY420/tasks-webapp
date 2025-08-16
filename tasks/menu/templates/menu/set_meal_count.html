@@ -1,12 +1,19 @@
 {% extends 'main/base.html' %}
 {% block title %}Set Meal Count{% endblock %}
+
 {% block content %}
   <h1>How many meals per day do you plan?</h1>
   <form method="post">
     {% csrf_token %}
     <div class="mb-3">
       <label for="meal_count" class="form-label">Meals per day</label>
-      <input type="number" id="meal_count" name="meal_count" class="form-control" min="1" step="1" required>
+      <input type="number"
+             id="meal_count"
+             name="meal_count"
+             class="form-control"
+             min="1"
+             step="1"
+             required>
     </div>
     <button type="submit" class="btn btn-primary">Save</button>
   </form>

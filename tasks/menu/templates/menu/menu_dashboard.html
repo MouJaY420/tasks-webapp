@@ -2,85 +2,71 @@
 {% load static %}
 
 {% block title %}Menu Planner{% endblock %}
-
 {% block content %}
-<h1>Menu Planner</h1>
+  <h1>Menu Planner</h1>
 
-<!-- Section: Create a new plan -->
-<h2>Create Weekly Plan</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ plan_form.non_field_errors }}
-  <div class="mb-3">
-    {{ plan_form.name.label_tag }} {{ plan_form.name }}
-  </div>
-  <div class="mb-3">
-    {{ plan_form.start_date.label_tag }} {{ plan_form.start_date }}
-    {{ plan_form.end_date.label_tag }} {{ plan_form.end_date }}
-  </div>
-  {{ formset.management_form }}
-  <table class="table">
-    <thead>
-      <tr><th>Date</th><th>Meal</th><th>Description</th></tr>
-    </thead>
-    <tbody>
-      {% for form in formset %}
-        <tr>
-          <td>{{ form.date }}</td>
-          <td>{{ form.meal_type }}</td>
-          <td class="editable"
-              data-input-id="{{ form.description.id_for_label }}"
-              contenteditable="true"></td>
-          {{ form.description.as_hidden }}
-        </tr>
+  <h2>Create Weekly Plan</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ plan_form.non_field_errors }}
+    <div class="mb-3">
+      {{ plan_form.name.label_tag }} {{ plan_form.name }}
+    </div>
+    <div class="mb-3">
+      {{ plan_form.start_date.label_tag }} {{ plan_form.start_date }}
+      {{ plan_form.end_date.label_tag }} {{ plan_form.end_date }}
+    </div>
+    {{ formset.management_form }}
+    <table class="table table-bordered">
+      <thead>
+        <tr><th>Date</th><th>Meal</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        {% for form in formset %}
+          <tr>
+            <td>{{ form.date }}</td>
+            <td>{{ form.meal_type }}</td>
+            <td>
+              <!-- editable cell ties to hidden input via JS -->
+              <div contenteditable="true" data-input-id="{{ form.description.id_for_label }}"></div>
+              {{ form.description.as_hidden }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Save Plan</button>
+  </form>
 
-      {% endfor %}
-    </tbody>
-  </table>
-  <button type="submit" class="btn btn-primary">Save Plan</button>
-</form>
-
-<!-- Section: List existing plans -->
-<h2 class="mt-4">Existing Plans</h2>
-{% if existing_plans %}
+  <h2>Existing Plans</h2>
   {% for plan in existing_plans %}
-  <div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span>{{ plan.name }} ({{ plan.start_date }}–{{ plan.end_date }})</span>
-      <div>
-        <a href="{% url 'menu:edit_menu_plan' plan.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-        <form action="{% url 'menu:delete_menu_plan' plan.pk %}" method="post" style="display:inline;">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-        </form>
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>{{ plan.name }} ({{ plan.start_date }}–{{ plan.end_date }})</span>
+        <div>
+          <a href="{% url 'menu:edit_menu_plan' plan.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+          <form method="post" action="{% url 'menu:delete_menu_plan' plan.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm table-striped m-0">
+          <thead><tr><th>Date</th><th>Meal</th><th>Description</th></tr></thead>
+          <tbody>
+            {% for entry in plan.entries.all %}
+              <tr>
+                <td>{{ entry.date }}</td>
+                <td>{{ entry.meal_type|title }}</td>
+                <td>{{ entry.description }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
-    <div class="card-body p-0">
-      <table class="table table-sm table-bordered m-0">
-        <thead>
-          <tr><th>Date</th><th>Meal</th><th>Description</th></tr>
-        </thead>
-        <tbody>
-          {% for entry in plan.entries.all|dictsort:'date' %}
-            <tr>
-              <td>{{ entry.date }}</td>
-              <td>{{ entry.meal_type|title }}</td>
-              <td>{{ entry.description }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-{% empty %}
-  <p>No plans yet.</p>
-{% endfor %}
-
-{% else %}
-  <p>No menu plans have been created yet.</p>
-{% endif %}
-{% endblock %}
-
-{% block extra_js %}
-  <script src="{% static 'menu/js/menu.js' %}"></script>
+  {% empty %}
+    <p>No plans yet.</p>
+  {% endfor %}
 {% endblock %}
